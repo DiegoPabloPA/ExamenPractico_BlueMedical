@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Precio extends Model
 {
     use HasFactory;
+    public $timestamps = false;
     protected $table="precio";
     protected $fillable=[
         "id",

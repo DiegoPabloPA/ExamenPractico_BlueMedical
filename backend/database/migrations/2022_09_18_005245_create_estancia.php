@@ -15,9 +15,9 @@ return new class extends Migration
     {
         Schema::create('estancia', function (Blueprint $table) {
             $table->id();
-            $table->timestamp('fechaInicio');
-            $table ->timestamp('fechaFin');
-            $table ->unsignedBigInteger('acumulado');
+            $table->timestamp('fechaInicio')->nullable();
+            $table ->timestamp('fechaFin')->nullable();
+            $table ->unsignedBigInteger('acumulado')->default(0);
             $table ->string('vehiculo_placa',15);
             $table ->foreign('vehiculo_placa')
             ->references('placa')->on('vehiculo')

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Estancia extends Model
 {
     use HasFactory;
+    public $timestamps = false;
     protected $table="estancia";
     protected $fillable=[
         "id",

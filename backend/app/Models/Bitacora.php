@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Bitacora extends Model
 {
     use HasFactory;
+    public $timestamps = false;
     protected $table="bitacora";
     protected $fillable=[
        "id",

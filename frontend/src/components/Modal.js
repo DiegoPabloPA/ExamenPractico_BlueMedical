@@ -7,7 +7,7 @@ const Modals = (props) => {
     return (
         <>
 
-            <Modal backdrop={props.backdrop ? props.backdrop : true} title={props.title} show={props.show} fullscreen={false} onHide={props.close} size={props.size} centered={props.centered}>
+            <Modal backdrop={props.backdrop ? props.backdrop : true} title={props.title} show={props.show} fullscreen={props.screen} onHide={props.close} size={props.size} centered={props.centered}>
                 <Modal.Header closeButton>
                     <Modal.Title>{props.title}</Modal.Title>
                 </Modal.Header>

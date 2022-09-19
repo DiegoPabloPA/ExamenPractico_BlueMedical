@@ -3,9 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Tipo;
 
 class TipoController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('jwt');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -13,7 +18,7 @@ class TipoController extends Controller
      */
     public function index()
     {
-        //
+       return Tipo::where('nombre','NOT LIKE','%no%')->get();
     }
 
     /**

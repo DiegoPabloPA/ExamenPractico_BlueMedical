@@ -17,8 +17,8 @@ return new class extends Migration
             $table->id();
             $table->string('placa',15);
             $table->string('concepto',250)->nullable();
-            $table->timestamp('fechaInicio');
-            $table->timestamp('fechaFin');
+            $table->timestamp('fechaInicio')->nullable();
+            $table->timestamp('fechaFin')->nullable();
             $table->decimal('importe',10,2)->default(0);
             $table->string('creadoPor',250);
         });
