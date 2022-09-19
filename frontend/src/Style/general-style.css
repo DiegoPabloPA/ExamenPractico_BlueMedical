@@ -46,3 +46,34 @@
     background-color: rgb(216, 4, 4)!important;
     color: aliceblue!important;
 }
+
+
+
+.orangeButton{
+    background-color: rgb(165, 74, 0)!important;
+    color: aliceblue!important;
+}
+
+
+.orangeButton:hover{
+    background-color: rgb(230, 110, 12)!important;
+    color: aliceblue!important;
+}
+
+.violetButton{
+    background-color: rgb(66, 0, 88)!important;
+    color: aliceblue!important;
+}
+
+
+.violetButton:hover{
+    background-color: rgb(115, 2, 153)!important;
+    color: aliceblue!important;
+}
+.nondecoration{
+    text-decoration: none!important;
+}
+
+.positionLogin{
+    margin-top: 10%;
+}

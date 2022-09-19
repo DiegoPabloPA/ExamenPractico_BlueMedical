@@ -1,20 +1,33 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { ConfirmCloseAlert } from "../components/Alerts"
 import Modals from "../components/Modal"
-import { getInformationNoData } from "../services/CRUD"
+import md5 from 'md5'
+import {CSVLink} from 'react-csv'
+import { formatDate, getActualDate } from "../functions/Date"
+import { createRegister, DeleteRegister, getInformationNoData } from "../services/CRUD"
+import { getBitacoraStructure, getSalidaStructure, getVehiculosStructure } from "../structures/Vehiculos"
 import "../Style/general-style.css"
+import { getPagoResidentes } from "../functions/Excel"
 
 
 const Gestion = (props) => {
     const [showModal1, setShowModal1] = useState(false)
     const [showModal2, setShowModal2] = useState(false)
     const [tipos, setTipos] = useState([])
+    const [bitacora, setBitacora] = useState([])
+    const [pagoResidente,setPagoResidente]=useState([])
+    const [placa, setPlaca] = useState('')
+    const [tipo, setTipo] = useState('0')
+
 
     function closeModal(modal) {
         switch (modal) {
             case "showModal1":
+                clearValuesAlta()
                 setShowModal1(false)
                 break;
             case "showModal2":
+                clearValuesAlta()
                 setShowModal2(false)
                 break;
             default:
@@ -43,14 +56,73 @@ const Gestion = (props) => {
         if (result.status === 200) {
             setTipos(result.data)
         } else {
-            //Todo Error va aqui
-            return []
+            setTipos([])
+        }
+    }
+    async function getBitacora() {
+        const result = await getInformationNoData('/get/Bitacora')
+        if (result.status === 200) {
+            setBitacora(result.data)
+        } else {
+            setBitacora([])
+        }
+    }
+
+
+    const ChangeInputs = (e) => {
+        switch (e.target.id) {
+            case "nuevaMatriculaGestion":
+            case "nuevoIngresoGestion":
+                setPlaca(e.target.value)
+                break;
+            case "tipoVehiculoGestion":
+                setTipo(e.target.value)
+                break;
+            default:
+                break;
         }
     }
 
     async function RegistrarVehiculo() {
-        closeModal()
+        const result = await createRegister('/nuevo/Vehiculo', getVehiculosStructure(placa, tipo))
+        if (result.status === 200) {
+            ConfirmCloseAlert('success', `El vehículo con la Placa: ${placa} \n se registro exitosamente`)
+            closeModal("showModal1")
+        }
     }
+
+    async function RegistrarIngreso() {
+        const result = await createRegister('/nuevo/Ingreso', getBitacoraStructure(placa))
+        if (result.status === 200) {
+            ConfirmCloseAlert('success', `Se ha registrado el ingreso \n del vehículo con la Placa: ${placa} exitosamente`)
+            closeModal("showModal2")
+            getBitacora()
+        }
+    }
+    async function RegistrarSalida(placa, fechaInicio) {
+        const result = await createRegister('/update/Ingreso', getSalidaStructure(placa, fechaInicio))
+        if (result.status === 200) {
+            ConfirmCloseAlert('success', result.data.message)
+            getBitacora()
+        }
+    }
+    function clearValuesAlta() {
+        setTipo('0')
+        setPlaca('')
+    }
+    async function comienzaMes() {
+        const result = await DeleteRegister('/delete/Estancia')
+        if (result.status === 200) {
+            ConfirmCloseAlert('success', result.data.message)
+        }
+    }
+    
+
+    useEffect(() => {
+        getBitacora()
+        console.log(md5('admin'))
+        
+    }, [])
 
     return (
         <div>
@@ -65,6 +137,29 @@ const Gestion = (props) => {
                     <div className="col-6  text-center">
                         <div className="d-grid gap-2">
                             <button type="button" className="btn greenButton btn-lg btn-block" onClick={() => OpenModal("showModal2")}>Registrar Entrada de Vehículo</button>
+                        </div>
+                    </div>
+                    <div className="col-6 pt-3  text-center">
+                      
+                            <CSVLink className="nondecoration" data={pagoResidente} filename={"Pago de Residentes "+getActualDate()}
+                              asyncOnClick={true}
+                              onClick={async () => {
+                                const datas=await getPagoResidentes()
+                                await setPagoResidente(datas)
+                              }}
+                            
+                            >
+                            <div className="d-grid gap-2">
+                                <button  type="button" className="btn violetButton btn-lg btn-block" >Pago de Residentes</button>
+                            </div>
+                            </CSVLink>
+                         
+
+                    </div>
+
+                    <div className="col-6 pt-3  text-center">
+                        <div className="d-grid gap-2">
+                            <button onClick={() => comienzaMes()} type="button" className="btn orangeButton btn-lg btn-block" >Comienza Mes</button>
                         </div>
                     </div>
                     <div className="col-12 pt-5">
@@ -83,26 +178,20 @@ const Gestion = (props) => {
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr className="text-center">
-                                    <td>P820DMB</td>
-                                    <td>Vehiculo Oficial</td>
-                                    <td>17/09/2021 12:34:44 AM</td>
-                                    <td>
-                                        <div className="d-grid gap-2">
-                                            <button type="button" className="btn redButton btn-lg btn-block">Registrar Salida</button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr className="text-center">
-                                    <td>P820DMB</td>
-                                    <td>Vehiculo Oficial</td>
-                                    <td>17/09/2021 12:34:44 AM</td>
-                                    <td>
-                                        <div className="d-grid gap-2">
-                                            <button type="button" className="btn redButton btn-lg btn-block">Registrar Salida</button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                {bitacora.map((elemento, e) => (
+                                    <tr key={e} className="text-center">
+                                        <td>{elemento.placa}</td>
+                                        <td>{elemento.nombre ? elemento.nombre : 'No residente'}</td>
+                                        <td>{formatDate(elemento.fechaInicio)}</td>
+                                        <td>
+                                            <div className="d-grid gap-2">
+                                                <button onClick={() => RegistrarSalida(elemento.placa, elemento.fechaInicio)} type="button" className="btn redButton btn-lg btn-block">Registrar Salida</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+
+
                             </tbody>
                         </table>
 
@@ -115,13 +204,13 @@ const Gestion = (props) => {
                         <div className="col-12 positionSpace">
                             <div className="input-group input-group-lg">
                                 <span className="input-group-text">Matricula</span>
-                                <input type="text" id="nuevaMatriculaGestion" className="form-control" placeholder="Ingrese una matricula" />
+                                <input onChange={ChangeInputs} type="text" id="nuevaMatriculaGestion" className="form-control" placeholder="Ingrese una matricula" />
                             </div>
                         </div>
                         <div className="col-12 positionSpace">
                             <div className="input-group input-group-lg">
                                 <label className="input-group-text">Tipo</label>
-                                <select className="form-select" id="tipoVehiculoGestion">
+                                <select onChange={ChangeInputs} className="form-select" id="tipoVehiculoGestion">
                                     <option value="0">Seleccione el Tipo de Vehículo</option>
                                     {tipos.map((tipo, t) => (
                                         <option key={t} value={tipo.id}>{tipo.nombre}</option>
@@ -132,7 +221,7 @@ const Gestion = (props) => {
                         </div>
                         <div className="col-12 text-center positionSpace">
                             <div className="d-grid gap-2">
-                                <button type="button" className="btn violetButton btn-lg btn-block" onClick={() => RegistrarVehiculo()}>Dar de Alta Vehículo </button>
+                                <button disabled={placa === '' || tipo === '0'} type="button" className="btn violetButton btn-lg btn-block" onClick={() => RegistrarVehiculo()}>Dar de Alta Vehículo </button>
                             </div>
                         </div>
                     </div>
@@ -144,12 +233,12 @@ const Gestion = (props) => {
                         <div className="col-12 positionSpace">
                             <div className="input-group input-group-lg">
                                 <span className="input-group-text">Matricula</span>
-                                <input type="text" id="nuevoIngresoGestion" className="form-control" placeholder="Ingrese una matricula" />
+                                <input type="text" onChange={ChangeInputs} id="nuevoIngresoGestion" className="form-control" placeholder="Ingrese una matricula" />
                             </div>
                         </div>
                         <div className="col-12 text-center positionSpace">
                             <div className="d-grid gap-2">
-                                <button type="button" className="btn violetButton btn-lg btn-block" onClick={() => RegistrarVehiculo()}>Registrar Ingreso</button>
+                                <button type="button" disabled={placa === ''} className="btn violetButton btn-lg btn-block" onClick={() => RegistrarIngreso()}>Registrar Ingreso</button>
                             </div>
                         </div>
                     </div>
@@ -161,4 +250,5 @@ const Gestion = (props) => {
 }
 
 
-export default Gestion
+
+export { Gestion}

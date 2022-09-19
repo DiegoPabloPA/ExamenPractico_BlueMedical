@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use \App\Http\Controllers\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +15,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get("/getTipos",function(){
-    return \App\Models\Tipo::all();
-});
+
+
+Route::get("getTipos",[\App\Http\Controllers\TipoController::class,'index']);
+Route::post("nuevo/Vehiculo",[App\Http\Controllers\VehiculoController::class,'store']);
+Route::post("nuevo/Ingreso",[App\Http\Controllers\BitacoraController::class,'store']);
+Route::post("update/Ingreso",[App\Http\Controllers\BitacoraController::class,'update']);
+Route::get("get/Bitacora",[App\Http\Controllers\BitacoraController::class,'index']);
+Route::delete("delete/Estancia",[App\Http\Controllers\EstanciaController::class,'ClearEstancia']);
+Route::get("get/Residentes/Pago",[App\Http\Controllers\EstanciaController::class,'getEstanciaResidentes']);
+Route::post("login",[App\Http\Controllers\AuthController::class,'login']);

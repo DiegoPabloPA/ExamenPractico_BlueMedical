@@ -3,9 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+use App\Models\Vehiculo;
+use App\Http\Requests\CreateVehiculoRequest;
 class VehiculoController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('jwt');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -22,9 +27,17 @@ class VehiculoController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
-    {
-        //
+    public function store(CreateVehiculoRequest $request)
+    {   
+      
+        try{
+        Vehiculo::create($request->all());
+        return \response()->json(['res'=>true,'Message'=>'Vehiculo Registrado Exitosamente'],200);
+        }catch(Exception $ex){
+        return \response()->json(['res'=>false,'Message'=>'ERROR Se presento el siguiente Problema: '.$e->getMessage()],200);
+        }
+        
+        
     }
 
     /**
